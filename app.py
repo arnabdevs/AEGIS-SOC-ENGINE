@@ -1,11 +1,11 @@
 """
 ╔══════════════════════════════════════════════════════════════╗
-║        AEGIS SOC ENGINE v4.0 — HARDENED EDITION             ║
+║        AEGIS SOC ENGINE v5.0 — HARDENED EDITION             ║
 ║        Owner : Arnab Kumar Das                               ║
 ║        GitHub: https://github.com/arnabdevs                ║
 ╚══════════════════════════════════════════════════════════════╝
 
-Upgrades in v4:
+Upgrades in v5:
   • bcrypt password hashing
   • Supabase PostgreSQL (data survives restarts)
   • Redis (Upstash) rate-limiter — persists across dyno restarts
@@ -26,6 +26,7 @@ from routes.auth    import auth_bp
 from routes.scan    import scan_bp
 from routes.monitor import monitor_bp
 from routes.admin   import admin_bp
+from routes.protect import protect_bp
 import utils.database as dbl
 from utils.logger import log_event
 from services.monitor_daemon import start_monitor_daemon
@@ -101,6 +102,7 @@ app.register_blueprint(auth_bp,    url_prefix="/api/auth")
 app.register_blueprint(scan_bp,    url_prefix="/api/scan")
 app.register_blueprint(monitor_bp, url_prefix="/api/monitor")
 app.register_blueprint(admin_bp,   url_prefix="/api/admin")
+app.register_blueprint(protect_bp, url_prefix="/api/protect")
 
 
 # ── Public endpoints ──────────────────────────────────────────
@@ -108,7 +110,7 @@ app.register_blueprint(admin_bp,   url_prefix="/api/admin")
 def root():
     return jsonify({
         "name":    "AEGIS SOC Engine",
-        "version": "4.0",
+        "version": "5.0",
         "owner":   "Arnab Kumar Das",
         "github":  "https://github.com/arnabdevs",
         "status":  "online",
@@ -164,7 +166,7 @@ start_monitor_daemon() # background 24-h report thread
 # ── Local dev ─────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    print(f"\n  🛡  AEGIS SOC Engine v4.0\n"
+    print(f"\n  🛡  AEGIS SOC Engine v5.0\n"
           f"  👤  Arnab Kumar Das | github.com/arnabdevs\n"
           f"  🌐  http://localhost:{port}\n")
     app.run(host="0.0.0.0", port=port, debug=False)

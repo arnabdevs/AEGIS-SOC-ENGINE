@@ -58,6 +58,7 @@ if USE_POSTGRES:
             monitored        JSONB DEFAULT '[]',
             verified         BOOLEAN DEFAULT FALSE,
             verify_token     TEXT DEFAULT '',
+            cf_zones         JSONB DEFAULT '{}',
             created_at       TIMESTAMPTZ DEFAULT NOW()
         );
 
@@ -116,6 +117,7 @@ if USE_POSTGRES:
             return None
         d = dict(row)
         d["monitored"] = d["monitored"] if isinstance(d["monitored"], list) else json.loads(d["monitored"] or "[]")
+        d["cf_zones"]   = d.get("cf_zones") if isinstance(d.get("cf_zones"), dict) else json.loads(d.get("cf_zones") or "{}")
         return d
 
     def create_user(email: str, data: dict) -> None:
@@ -124,8 +126,8 @@ if USE_POSTGRES:
                 cur.execute("""
                     INSERT INTO users
                         (email, password_hash, name, telegram_chat_id,
-                         monitored, verified, verify_token)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                         monitored, verified, verify_token, cf_zones)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
                     email,
                     data["password"],
@@ -134,19 +136,20 @@ if USE_POSTGRES:
                     json.dumps(data.get("monitored", [])),
                     data.get("verified", False),
                     data.get("verify_token", ""),
+                    json.dumps(data.get("cf_zones", {})),
                 ))
             con.commit()
 
     def update_user(email: str, data: dict) -> None:
         allowed = ("password", "name", "telegram_chat_id",
-                   "monitored", "verified", "verify_token")
+                   "monitored", "verified", "verify_token", "cf_zones")
         sets, vals = [], []
         for k, v in data.items():
             if k not in allowed:
                 continue
             col = "password_hash" if k == "password" else k
             sets.append(f"{col} = %s")
-            vals.append(json.dumps(v) if k == "monitored" else v)
+            vals.append(json.dumps(v) if k in ("monitored", "cf_zones") else v)
         if not sets:
             return
         vals.append(email)
@@ -353,6 +356,8 @@ else:
         return _mem["users"].get(email)
 
     def create_user(email: str, data: dict) -> None:
+        if "cf_zones" not in data:
+            data["cf_zones"] = {}
         _mem["users"][email] = data
 
     def update_user(email: str, data: dict) -> None:

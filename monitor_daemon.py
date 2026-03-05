@@ -137,17 +137,62 @@ def _daemon_loop():
   </div>
 </div>"""
 
+                    # ── Auto-defend if zone is connected ──────────────────
+                    auto_defend_report = None
+                    cfg = user.get("cf_zones", {}).get(domain)
+                    if cfg:
+                        try:
+                            from services.cloudflare_service import auto_defend
+                            auto_defend_report = auto_defend(
+                                cfg["cf_token"], cfg["zone_id"], domain, r
+                            )
+                            print(f"[AEGIS] Auto-defend → {domain}: {auto_defend_report.get('summary','')}")
+                        except Exception as ae:
+                            print(f"[AEGIS] Auto-defend error for {domain}: {ae}")
+
+                    # ── Build email with auto-defend section ──────────────
+                    defend_section = ""
+                    if auto_defend_report:
+                        ips_blocked = auto_defend_report.get("ips_blocked", [])
+                        applied     = auto_defend_report.get("hardening", {}).get("applied", [])
+                        email_grade = auto_defend_report.get("email_security", {}).get("grade", "N/A")
+                        ip_rows = "".join(
+                            f'<li style="margin:.2rem 0;color:#ff4d6d;">'
+                            f'🚫 Blocked {b["ip"]} — {b["reason"]}</li>'
+                            for b in ips_blocked
+                        )
+                        fix_rows = "".join(
+                            f'<li style="margin:.2rem 0;color:#00ff9f;">'
+                            f'✅ {a}</li>'
+                            for a in applied
+                        )
+                        defend_section = f"""
+  <h3 style="color:#ff4d6d;margin:16px 0 8px;letter-spacing:2px;">🛡️ AUTO-DEFEND ACTIONS</h3>
+  <ul style="color:#c8e0f0;padding-left:20px;">
+    {ip_rows if ip_rows else '<li style="color:#3a6a8a;">No IPs auto-blocked this cycle</li>'}
+    {fix_rows}
+    <li style="margin:.2rem 0;">📧 Email security grade: <strong style="color:#00d4ff;">{email_grade}</strong></li>
+  </ul>"""
+
+                    html_final = html.replace("</div>", defend_section + "</div>", 1) if defend_section else html
+
                     _send_email(email,
                                 f"[AEGIS] {domain} — Health {health}/100 | {lvl} Risk",
-                                html)
+                                html_final)
                     if chat_id:
+                        defend_line = ""
+                        if auto_defend_report:
+                            nb = len(auto_defend_report.get("ips_blocked", []))
+                            na = len(auto_defend_report.get("hardening", {}).get("applied", []))
+                            defend_line = f"\n🛡️ Auto-defend: {nb} IPs blocked, {na} settings hardened"
                         _send_telegram(
                             chat_id,
                             f"🛡️ <b>AEGIS Daily Report</b>\n\n"
                             f"🌐 <code>{domain}</code>\n"
                             f"{emoji} Health: <b>{health}/100</b>\n"
                             f"⚠ Threat: <b>{lvl}</b> ({tscore}/100)\n"
-                            f"🔒 SSL: <b>{ssl}</b>\n\n"
+                            f"🔒 SSL: <b>{ssl}</b>"
+                            + defend_line + "\n\n"
                             + "\n".join(f"• {rr}" for rr in reasons[:5]),
                         )
                     print(f"[AEGIS] Report → {email} | {domain} | {health} | {lvl}")

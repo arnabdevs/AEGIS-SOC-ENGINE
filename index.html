@@ -403,7 +403,8 @@ footer a:hover{text-decoration:underline;}
     <button class="ntab active" data-page="dashboard">DASHBOARD</button>
     <button class="ntab"        data-page="scan">SCAN</button>
     <button class="ntab"        data-page="feed">LIVE FEED</button>
-    <button class="ntab"        data-page="monitor" id="ntab-monitor" style="display:none;">MONITOR</button>
+    <button class="ntab"        data-page="monitor"  id="ntab-monitor"  style="display:none;">MONITOR</button>
+    <button class="ntab"        data-page="protect"  id="ntab-protect"  style="display:none;">🛡 PROTECT</button>
   </div>
   <div class="nav-right">
     <a class="gh-link" href="https://github.com/arnabdevs" target="_blank" rel="noopener">⬡ arnabdevs</a>
@@ -647,6 +648,106 @@ footer a:hover{text-decoration:underline;}
     </div>
     <button class="btn btn-cy" style="padding:10px 20px;font-size:.65rem;" onclick="saveTgSettings()">SAVE SETTINGS</button>
   </div></div>
+</div>
+</div>
+
+
+<!-- ═══ PROTECT PAGE ════════════════════════════════════════════ -->
+<div class="page" id="pg-protect">
+<div class="wrap">
+
+  <!-- Connect a domain -->
+  <div class="panel" style="margin-bottom:.9rem;"><div class="panel-body">
+    <div class="sec-lbl">🛡️ Active Defence — Connect a Client Domain to Cloudflare</div>
+    <div style="color:var(--muted);font-size:.68rem;line-height:1.8;margin-bottom:1rem;">
+      Connect any domain you manage on Cloudflare. AEGIS will block malicious IPs,
+      harden security settings, check email protection (SPF/DKIM/DMARC), and
+      run daily auto-defend scans automatically.
+    </div>
+    <div class="igrp" style="flex-direction:column;gap:.5rem;">
+      <div class="ibox">
+        <span class="ipfx">DOMAIN://</span>
+        <input type="text" id="cf-domain" placeholder="example.com"/>
+      </div>
+      <div class="ibox">
+        <span class="ipfx">TOKEN://</span>
+        <input type="text" id="cf-token" placeholder="Cloudflare API Token (Zone:Edit)"/>
+      </div>
+      <div class="ibox">
+        <span class="ipfx">ZONE ID://</span>
+        <input type="text" id="cf-zoneid" placeholder="Zone ID from Cloudflare dashboard"/>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.3rem;">
+        <button class="btn btn-cy" onclick="connectZone()" style="flex:1;">⚡ CONNECT &amp; PROTECT</button>
+        <a href="https://dash.cloudflare.com" target="_blank"
+           style="padding:8px 14px;border:1px solid var(--stroke2);border-radius:3px;
+                  color:var(--muted);font-family:var(--mono);font-size:.63rem;
+                  text-decoration:none;display:flex;align-items:center;">
+          Open Cloudflare ↗
+        </a>
+      </div>
+    </div>
+    <div style="margin-top:.75rem;padding:.6rem;background:rgba(0,212,255,.03);
+                border:1px solid var(--stroke2);border-radius:3px;">
+      <div style="color:var(--muted);font-size:.62rem;line-height:1.8;">
+        <strong style="color:var(--cyan);">How to get your Zone ID and API Token:</strong><br/>
+        1. Go to <strong>dash.cloudflare.com</strong> → click your domain<br/>
+        2. Scroll down on the Overview page → copy <strong>Zone ID</strong> from the right sidebar<br/>
+        3. Go to <strong>My Profile → API Tokens → Create Token</strong><br/>
+        4. Use template: <strong>"Edit zone DNS"</strong> → set Zone Resources to your domain<br/>
+        5. Paste both above and click Connect
+      </div>
+    </div>
+  </div></div>
+
+  <!-- Protected domains list -->
+  <div class="panel" style="margin-bottom:.9rem;"><div class="panel-body">
+    <div class="sec-lbl">Protected Domains</div>
+    <div id="protect-list">
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">
+        No domains protected yet. Connect one above.
+      </div>
+    </div>
+  </div></div>
+
+  <!-- Auto-defend panel -->
+  <div class="panel" style="margin-bottom:.9rem;" id="defend-panel" style="display:none;"><div class="panel-body">
+    <div class="sec-lbl">⚡ One-Click Auto-Defend</div>
+    <div style="color:var(--muted);font-size:.68rem;margin-bottom:.75rem;line-height:1.7;">
+      Scans the domain with all AEGIS intelligence and automatically pushes every
+      available defence to Cloudflare — blocks malicious IPs, enforces HTTPS,
+      enables Bot Fight Mode, hardens TLS, checks email security.
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+      <select id="defend-domain-sel"
+        style="background:var(--panel2);border:1px solid var(--stroke2);color:var(--fg);
+               padding:8px 12px;border-radius:3px;font-family:var(--mono);font-size:.68rem;flex:1;">
+        <option value="">Select domain…</option>
+      </select>
+      <button class="btn btn-cy" onclick="runAutoDefend()" style="white-space:nowrap;">
+        🛡️ AUTO-DEFEND NOW
+      </button>
+    </div>
+    <div id="defend-result" style="margin-top:.75rem;display:none;"></div>
+  </div></div>
+
+  <!-- Email security checker -->
+  <div class="panel"><div class="panel-body">
+    <div class="sec-lbl">📧 Email Security — SPF / DKIM / DMARC</div>
+    <div style="color:var(--muted);font-size:.68rem;margin-bottom:.75rem;">
+      Checks if your domain can be used to send phishing emails pretending to be you.
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <select id="email-sec-sel"
+        style="background:var(--panel2);border:1px solid var(--stroke2);color:var(--fg);
+               padding:8px 12px;border-radius:3px;font-family:var(--mono);font-size:.68rem;flex:1;">
+        <option value="">Select domain…</option>
+      </select>
+      <button class="btn btn-cy" onclick="checkEmailSecurity()">CHECK NOW</button>
+    </div>
+    <div id="email-sec-result" style="margin-top:.75rem;display:none;"></div>
+  </div></div>
+
 </div>
 </div>
 
@@ -1310,6 +1411,252 @@ async function submitAuth() {
   btn.disabled    = false;
 }
 
+// ══════════════════════════════════════════════════════════════
+// PROTECT PAGE — Active Defence via Cloudflare
+// ══════════════════════════════════════════════════════════════
+
+async function connectZone() {
+  const domain  = ($('cf-domain').value  || '').trim().replace(/^https?:\/\//,'').split('/')[0];
+  const token   = ($('cf-token').value   || '').trim();
+  const zone_id = ($('cf-zoneid').value  || '').trim();
+  if (!domain || !token || !zone_id) {
+    toast('Domain, API token and Zone ID are all required', 'err'); return;
+  }
+  toast('⟳ Connecting to Cloudflare…', 'ok');
+  try {
+    const data = await apiFetch('/api/protect/connect', {
+      method: 'POST',
+      body: JSON.stringify({ domain, cf_token: token, zone_id })
+    });
+    if (data.error) { toast(data.error, 'err'); return; }
+    toast(data.message || '✅ Domain connected', 'ok');
+    $('cf-domain').value = $('cf-token').value = $('cf-zoneid').value = '';
+    loadProtectedDomains();
+  } catch { toast('Backend unreachable', 'err'); }
+}
+
+async function loadProtectedDomains() {
+  if (!authToken) return;
+  try {
+    const data = await apiFetch('/api/protect/status');
+    if (data.error) return;
+    const domains = data.protected_domains || [];
+    const list    = $('protect-list');
+    const selDef  = $('defend-domain-sel');
+    const selEmail = $('email-sec-sel');
+
+    // Update selects
+    const opts = ['<option value="">Select domain…</option>',
+                  ...domains.map(d => `<option value="${d.domain}">${d.domain}</option>`)
+                 ].join('');
+    selDef.innerHTML = opts;
+    selEmail.innerHTML = opts;
+
+    // Show/hide auto-defend panel
+    $('defend-panel').style.display = domains.length ? 'block' : 'none';
+
+    if (!domains.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">No domains connected yet.</div>';
+      return;
+    }
+
+    list.innerHTML = domains.map(d => {
+      const gc = d.protection_score >= 80 ? '#00ff9f' : d.protection_score >= 50 ? '#ffb300' : '#ff4d6d';
+      const settings = d.settings || {};
+      const checks = [
+        { label: 'HTTPS Force',    ok: settings.always_use_https === 'on' },
+        { label: 'SSL Full',       ok: ['full','strict'].includes(settings.ssl) },
+        { label: 'Bot Fight Mode', ok: settings.bot_fight_mode === 'on' },
+        { label: 'TLS 1.2+',       ok: ['1.2','1.3'].includes(settings.min_tls_version) },
+        { label: 'Security: High', ok: ['high','under_attack'].includes(settings.security_level) },
+        { label: 'HTTPS Rewrites', ok: settings.automatic_https_rewrites === 'on' },
+      ];
+      const rows = checks.map(c =>
+        `<span style="display:inline-block;margin:.2rem .3rem 0 0;padding:2px 8px;
+                      background:${c.ok ? 'rgba(0,255,159,.08)' : 'rgba(255,77,109,.08)'};
+                      border:1px solid ${c.ok ? 'rgba(0,255,159,.25)' : 'rgba(255,77,109,.25)'};
+                      border-radius:2px;font-size:.6rem;color:${c.ok ? '#00ff9f' : '#ff4d6d'};">
+           ${c.ok ? '✓' : '✗'} ${c.label}</span>`
+      ).join('');
+
+      return `<div style="border:1px solid var(--stroke2);border-radius:4px;padding:.75rem;margin-bottom:.6rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+          <span style="color:var(--cyan);font-family:var(--mono);font-size:.75rem;font-weight:700;">${d.domain}</span>
+          <span style="color:${gc};font-size:.7rem;font-weight:700;">${d.grade} · ${d.protection_score}/100</span>
+        </div>
+        <div style="margin-bottom:.5rem;">${rows}</div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;">
+          <button onclick="hardenDomain('${d.domain}')"
+            style="padding:4px 10px;background:rgba(0,212,255,.08);border:1px solid var(--stroke2);
+                   border-radius:2px;color:var(--cyan);font-family:var(--mono);font-size:.6rem;cursor:pointer;">
+            ⚡ HARDEN
+          </button>
+          <button onclick="viewBlockedIPs('${d.domain}')"
+            style="padding:4px 10px;background:rgba(255,77,109,.08);border:1px solid var(--stroke2);
+                   border-radius:2px;color:#ff4d6d;font-family:var(--mono);font-size:.6rem;cursor:pointer;">
+            🚫 BLOCKED IPs (${d.blocked_ip_count})
+          </button>
+          <button onclick="disconnectZone('${d.domain}')"
+            style="padding:4px 10px;background:none;border:1px solid var(--stroke2);
+                   border-radius:2px;color:var(--muted);font-family:var(--mono);font-size:.6rem;cursor:pointer;">
+            ✕ DISCONNECT
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.error('loadProtectedDomains', e); }
+}
+
+async function runAutoDefend() {
+  const domain = $('defend-domain-sel').value;
+  if (!domain) { toast('Select a domain first', 'err'); return; }
+
+  const result = $('defend-result');
+  result.style.display = 'block';
+  result.innerHTML = `<div style="color:var(--muted);font-size:.68rem;font-family:var(--mono);">
+    ⟳ Running full AEGIS scan + pushing Cloudflare defences…<br/>
+    <span style="color:var(--muted);font-size:.62rem;">This takes 30–45 seconds</span>
+  </div>`;
+
+  try {
+    const data = await apiFetch('/api/protect/auto-defend', {
+      method: 'POST',
+      body: JSON.stringify({ domain })
+    });
+    if (data.error) { toast(data.error, 'err'); result.style.display = 'none'; return; }
+
+    const def    = data.defence || {};
+    const scan   = data.scan   || {};
+    const harden = def.hardening || {};
+    const emailg = (def.email_security || {}).grade || 'N/A';
+    const ips    = def.ips_blocked || [];
+    const applied= harden.applied || [];
+    const hc     = scan.health_score >= 80 ? '#00ff9f' : scan.health_score >= 50 ? '#ffb300' : '#ff4d6d';
+    const tc     = ['CRITICAL','HIGH'].includes(scan.threat_level) ? '#ff4d6d' : scan.threat_level === 'MEDIUM' ? '#ffb300' : '#00ff9f';
+
+    result.innerHTML = `
+    <div style="border:1px solid var(--stroke2);border-radius:4px;padding:.75rem;">
+      <div style="color:#00d4ff;font-family:var(--mono);font-size:.7rem;font-weight:700;
+                  letter-spacing:2px;margin-bottom:.6rem;">✅ AUTO-DEFEND COMPLETE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.6rem;">
+        <div style="padding:.4rem;background:rgba(0,212,255,.05);border-radius:3px;font-size:.63rem;">
+          <span style="color:var(--muted);">HEALTH SCORE</span><br/>
+          <span style="color:${hc};font-size:1.1rem;font-weight:900;">${scan.health_score}/100</span>
+        </div>
+        <div style="padding:.4rem;background:rgba(0,212,255,.05);border-radius:3px;font-size:.63rem;">
+          <span style="color:var(--muted);">THREAT LEVEL</span><br/>
+          <span style="color:${tc};font-size:1.1rem;font-weight:900;">${scan.threat_level}</span>
+        </div>
+        <div style="padding:.4rem;background:rgba(0,212,255,.05);border-radius:3px;font-size:.63rem;">
+          <span style="color:var(--muted);">IPs BLOCKED AT EDGE</span><br/>
+          <span style="color:#ff4d6d;font-size:1.1rem;font-weight:900;">${ips.length}</span>
+        </div>
+        <div style="padding:.4rem;background:rgba(0,212,255,.05);border-radius:3px;font-size:.63rem;">
+          <span style="color:var(--muted);">EMAIL SECURITY</span><br/>
+          <span style="color:#00d4ff;font-size:1.1rem;font-weight:900;">${emailg}</span>
+        </div>
+      </div>
+      ${ips.length ? `
+      <div style="margin-bottom:.5rem;">
+        <div style="color:var(--muted);font-size:.62rem;margin-bottom:.3rem;">IPs BLOCKED AT CLOUDFLARE EDGE:</div>
+        ${ips.map(b => `<div style="font-family:var(--mono);font-size:.63rem;color:#ff4d6d;">🚫 ${b.ip} — ${b.reason}</div>`).join('')}
+      </div>` : ''}
+      ${applied.length ? `
+      <div style="margin-bottom:.5rem;">
+        <div style="color:var(--muted);font-size:.62rem;margin-bottom:.3rem;">SETTINGS HARDENED:</div>
+        ${applied.map(a => `<div style="font-family:var(--mono);font-size:.63rem;color:#00ff9f;">✅ ${a}</div>`).join('')}
+      </div>` : ''}
+      <div style="color:var(--muted);font-size:.62rem;margin-top:.4rem;font-style:italic;">
+        ${def.summary || ''}
+      </div>
+    </div>`;
+    loadProtectedDomains();
+  } catch { toast('Backend unreachable', 'err'); result.style.display = 'none'; }
+}
+
+async function hardenDomain(domain) {
+  toast(`⟳ Hardening ${domain}…`, 'ok');
+  try {
+    const data = await apiFetch('/api/protect/harden', {
+      method: 'POST', body: JSON.stringify({ domain })
+    });
+    toast(data.summary || '✅ Hardening applied', 'ok');
+    loadProtectedDomains();
+  } catch { toast('Backend unreachable', 'err'); }
+}
+
+async function viewBlockedIPs(domain) {
+  try {
+    const data = await apiFetch(`/api/protect/blocked-ips?domain=${encodeURIComponent(domain)}`);
+    if (data.error) { toast(data.error, 'err'); return; }
+    const ips = data.blocked_ips || [];
+    if (!ips.length) { toast(`No IPs currently blocked for ${domain}`, 'ok'); return; }
+    alert(`Blocked IPs for ${domain} (${ips.length}):\n\n` +
+          ips.map(b => `${b.ip}  —  ${b.note || 'no note'}`).join('\n'));
+  } catch { toast('Backend unreachable', 'err'); }
+}
+
+async function checkEmailSecurity() {
+  const domain = $('email-sec-sel').value;
+  if (!domain) { toast('Select a domain first', 'err'); return; }
+
+  const result = $('email-sec-result');
+  result.style.display = 'block';
+  result.innerHTML = '<div style="color:var(--muted);font-size:.68rem;">⟳ Checking SPF / DKIM / DMARC…</div>';
+
+  try {
+    const data = await apiFetch(`/api/protect/email-security?domain=${encodeURIComponent(domain)}`);
+    if (data.error) { result.innerHTML = `<div style="color:#ff4d6d;font-size:.68rem;">${data.error}</div>`; return; }
+
+    const gc = data.score >= 80 ? '#00ff9f' : data.score >= 50 ? '#ffb300' : '#ff4d6d';
+    const checks = [
+      { label: 'SPF',   ok: data.spf?.present,   val: data.spf?.record   || 'MISSING' },
+      { label: 'DMARC', ok: data.dmarc?.present,  val: data.dmarc?.strength || (data.dmarc?.record || 'MISSING') },
+      { label: 'DKIM',  ok: data.dkim?.present,   val: data.dkim?.selector ? `selector: ${data.dkim.selector}` : 'Not found' },
+      { label: 'MX',    ok: data.mx?.present,     val: (data.mx?.records || []).join(', ') || 'MISSING' },
+    ];
+    const rows = checks.map(c =>
+      `<div style="display:flex;align-items:baseline;gap:.5rem;padding:.3rem 0;
+                   border-bottom:1px solid var(--stroke2);">
+        <span style="color:${c.ok ? '#00ff9f' : '#ff4d6d'};font-size:.9rem;">${c.ok ? '✓' : '✗'}</span>
+        <span style="color:var(--cyan);font-family:var(--mono);font-size:.68rem;min-width:60px;">${c.label}</span>
+        <span style="color:var(--muted);font-size:.63rem;word-break:break-all;">${c.val}</span>
+      </div>`
+    ).join('');
+
+    const fixes = (data.fixes || []).map(f =>
+      `<div style="margin:.4rem 0;padding:.5rem;background:rgba(255,77,109,.06);
+                   border-left:2px solid #ff4d6d;border-radius:0 3px 3px 0;">
+        <div style="color:#ff4d6d;font-size:.65rem;font-weight:700;">${f.type} — ${f.severity}</div>
+        <div style="color:var(--muted);font-size:.62rem;margin:.2rem 0;">${f.problem}</div>
+        <div style="color:#00ff9f;font-family:var(--mono);font-size:.6rem;word-break:break-all;">FIX: ${f.fix}</div>
+      </div>`
+    ).join('');
+
+    result.innerHTML = `
+    <div style="border:1px solid var(--stroke2);border-radius:4px;padding:.75rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;">
+        <span style="color:var(--cyan);font-family:var(--mono);font-size:.7rem;">EMAIL SECURITY — ${domain}</span>
+        <span style="color:${gc};font-size:1.1rem;font-weight:900;">${data.grade} (${data.score}/100)</span>
+      </div>
+      ${rows}
+      ${fixes ? `<div style="margin-top:.75rem;"><div style="color:var(--muted);font-size:.62rem;margin-bottom:.3rem;letter-spacing:1px;">FIXES REQUIRED:</div>${fixes}</div>` : ''}
+      ${!fixes ? '<div style="color:#00ff9f;font-size:.68rem;margin-top:.5rem;">✅ Email security is fully configured</div>' : ''}
+    </div>`;
+  } catch { toast('Backend unreachable', 'err'); result.style.display = 'none'; }
+}
+
+async function disconnectZone(domain) {
+  if (!confirm(`Disconnect ${domain} from AEGIS Active Defence?`)) return;
+  try {
+    const data = await apiFetch('/api/protect/disconnect', {
+      method: 'DELETE', body: JSON.stringify({ domain })
+    });
+    toast(data.message || '✅ Disconnected', 'ok');
+    loadProtectedDomains();
+  } catch { toast('Backend unreachable', 'err'); }
+}
+
 async function resendVerification(email) {
   try {
     const data = await apiFetch('/api/auth/resend-verification',
@@ -1326,6 +1673,8 @@ function doLogout() {
   show('btn-register');
   hide('ntab-monitor');
   $('ntab-monitor').style.display = 'none';
+  hide('ntab-protect');
+  $('ntab-protect').style.display = 'none';
   goPage('dashboard');
   toast('Logged out', 'info');
 }
@@ -1335,6 +1684,8 @@ function onLogin() {
   hide('btn-register');
   show('btn-logout');
   $('ntab-monitor').style.display = '';
+  $('ntab-protect').style.display = '';
+  loadProtectedDomains();
   loadMonitorList();
 }
 
