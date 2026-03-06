@@ -3,9 +3,8 @@ services:
     name: aegis-soc-v4
     env: python
     plan: free
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --log-level info
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn --chdir backend wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --log-level info
     envVars:
       - key: SECRET_KEY
         generateValue: true
